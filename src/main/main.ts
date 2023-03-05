@@ -60,20 +60,6 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
-// key logger
-// pythonProcess.stdout.on('data', (data) => {
-//   console.log(`Python script stdout: ${data}`);
-// });
-
-// pythonProcess.stderr.on('data', (data) => {
-//   console.error(`Python script stderr: ${data}`);
-// });
-
-// pythonProcess.on('close', (code) => {
-//   console.log(`Python script exited with code ${code}`);
-// });
-
-
 const createWindow = async () => {
   if (isDebug) {
     await installExtensions();
@@ -87,15 +73,13 @@ const createWindow = async () => {
     return path.join(RESOURCES_PATH, ...paths);
   };
 
-  const scriptPath = getAssetPath(path.join('python_modules', 'tracker.py'));
-  const pyPath = getAssetPath(path.join('python_modules', 'venv', 'Scripts', 'python.exe'));
-
-  const pyshell = new PythonShell(scriptPath, { pythonPath: pyPath })
-
-  pyshell.on('message', function(message) {
-    console.log(message);
-    // mainWindow?.webContents.send('message', message);
-  })
+  // const scriptPath = getAssetPath(path.join('python_modules', 'tracker.py'));
+  // const pyPath = getAssetPath(path.join('python_modules', 'venv', 'Scripts', 'python.exe'));
+  // const pyshell = new PythonShell(scriptPath, { pythonPath: pyPath })
+  // pyshell.on('message', function(message) {
+  //   console.log(message);
+  //   // mainWindow?.webContents.send('message', message);
+  // })
 
   // pyshell.end(function (err) {
   //   if (err){
