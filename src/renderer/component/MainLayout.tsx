@@ -4,14 +4,16 @@ import LeftSidebar from './LeftSidebar';
 
 const MainLayout = () => {
   return (
-    <Fragment>
-      <header></header>
+    <div id='root-container'>
+      <main>
         <LeftSidebar/>
-        <main>
+        <div id='main-container'>
+          <header>header</header>
           <Outlet/>
-        </main>
-
-    </Fragment>
+        </div>
+      </main>
+      <footer>footer</footer>
+    </div>
   )
 }
 

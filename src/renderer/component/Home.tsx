@@ -2,11 +2,6 @@ import { useState } from 'react';
 import { postServer } from '../../main/server';
 import icon from '../../../assets/icon.svg';
 
-// ipcRenderer.on('message', (event, message) => {
-//   console.log("ipcRenderer On");
-//   console.log(message); // Output: 'Hello, world!'
-// });
-
 interface emoji {
   creation_date: string,
   description : string,
@@ -19,7 +14,13 @@ interface emoji {
   img_data: string,
 }
 
-export default function Hello() {
+window.electron.ipcRenderer.on('favorite-list', (arg) => {
+  console.log(arg);
+});
+
+let i = 1;
+
+export default function Home() {
   const [test, setTest] = useState<emoji[] | null>(null);
 
   // let test: emoji[];
@@ -41,39 +42,40 @@ export default function Hello() {
     // img_data = test![0].img_data
   }
 
+  function handleClick2() {
+    // window.electron.ipcRenderer.send('ipc-test');
+    let ret = {["test" + i] : "ttt" + i}
+    i += 1
+    window.electron.ipcRenderer.sendMessage('favorite-add', ret);
+  }
+
+  function handleClick3() {
+    // window.electron.ipcRenderer.send('ipc-test');
+    let ret = ["test" + (i-1)]
+    i -= 1
+    window.electron.ipcRenderer.sendMessage('favorite-delete', ret);
+  }
+
   return (
     <div>
       <div className="Hello">
-        <img width="200" alt="icon" src={icon} />
-      </div>
-      <h1>electron-react-boilerplate</h1>
-      <div className="Hello">
-        <a
-          // href="https://electron-react-boilerplate.js.org/"
-          target="_blank"
-          rel="noreferrer"
-        >
           <button type="button" onClick={handleClick}>
             <span role="img" aria-label="books">
               📚
               {test && test![0].name}ddd
-              {/* <img src={icon} /> */}
             </span>
           </button>
-          {/* <img width="200" alt="icon1" src={`data:image/jpeg;base64,${test && test![0].img_data}`}/> */}
-        </a>
-        <a
-          href="https://github.com/sponsors/electron-react-boilerplate"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
+          <button type="button" onClick={handleClick2}>
             <span role="img" aria-label="folded hands">
               🙏
             </span>
-            Donate
+            add
           </button>
-        </a>
+          <button type="button" onClick={handleClick3}>
+            <span role="img" aria-label="folded hands">
+            </span>
+            delete
+          </button>
       </div>
     </div>
   );

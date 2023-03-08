@@ -9,7 +9,7 @@ export function postServer(url: string, inputData: object) {
   })
   .catch(err => {
     console.log(err);
-    return err
+    // return err
   })
 }
 
