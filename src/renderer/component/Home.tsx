@@ -1,81 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { postServer } from '../../main/server';
-import icon from '../../../assets/icon.svg';
+import { EmojiMainCard } from '../layout/EmojiFrame';
+import { EmojiElementCard } from '../layout/EmojiFrame';
+import { useNavigate } from 'react-router-dom';
+// favorite emoji
+// favorite EmojiElement
 
-interface emoji {
-  creation_date: string,
-  description : string,
-  id : number,
-  name : string,
-  path_main: string,
-  platform: string,
-  popularity: number,
-  type_main: string,
-  img_data: string,
-}
+import log from 'electron-log';
 
-window.electron.ipcRenderer.on('favorite-list', (arg) => {
-  console.log(arg);
-});
-
-let i = 1;
+// log.transports.file.level = 'info';
+// log.transports.console.format = '[{level}] {file}:{line} {message}';
+// log.info('This is a log message');
 
 export default function Home() {
-  const [test, setTest] = useState<emoji[] | null>(null);
+  const [emoji, setEmoji] = useState<FavoriteEmojis | null>(null);
+  const [element, setElement] = useState<FavoriteElements | null>(null);
 
-  // let test: emoji[];
-  let tt: string;
-  let kk = "hhh"
-  let img_data;
+  const navigate = useNavigate();
 
-  async function handleClick() {
-    console.log("testFunc start");
 
-    const url = "http://mymoji.iptime.org:20000/api/search/main"
-    const idata = {
-        page: 1,
-        item_num: 20
-    }
-    const response = await postServer(url, idata);
-    await setTest(response)
-    await console.log(test)
-    // img_data = test![0].img_data
-  }
-
-  function handleClick2() {
-    // window.electron.ipcRenderer.send('ipc-test');
-    let ret = {["test" + i] : "ttt" + i}
-    i += 1
-    window.electron.ipcRenderer.sendMessage('favorite-add', ret);
-  }
-
-  function handleClick3() {
-    // window.electron.ipcRenderer.send('ipc-test');
-    let ret = ["test" + (i-1)]
-    i -= 1
-    window.electron.ipcRenderer.sendMessage('favorite-delete', ret);
-  }
+  useEffect(() => {
+    window.electron.ipcRenderer.send('favorite-list')
+    return window.electron.ipcRenderer.home('favorite-list', (res) => {
+      setEmoji(res[0])
+      setElement(res[1])
+      // console.log(res);
+    });
+  }, [])
 
   return (
-    <div>
-      <div className="Hello">
-          <button type="button" onClick={handleClick}>
-            <span role="img" aria-label="books">
-              📚
-              {test && test![0].name}ddd
-            </span>
-          </button>
-          <button type="button" onClick={handleClick2}>
-            <span role="img" aria-label="folded hands">
-              🙏
-            </span>
-            add
-          </button>
-          <button type="button" onClick={handleClick3}>
-            <span role="img" aria-label="folded hands">
-            </span>
-            delete
-          </button>
+    <div id='main-container'>
+      <div id='favorite-container'>
+        {emoji?.map((item, index) => (
+            EmojiMainCard(item, navigate, {backgroundColor:'blue', height:'40px', width:'100px'})
+          ))}
+      </div>
+      <div id='emoji-container'>
+        {element?.map((item, index) => (
+          EmojiElementCard(item)
+        ))}
       </div>
     </div>
   );

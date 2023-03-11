@@ -3,8 +3,12 @@
  *        See https://github.com/webpack-contrib/sass-loader#imports
  */
 
+body {
+  margin: 0px
+}
 
-#root-container {
+/* entire page */
+#root {
   display: flex;
   flex-direction: column;
   background: linear-gradient(
@@ -14,30 +18,59 @@
     #7a2c9e 129.35%
   );
   height: 100vh;
+  overflow:visible;
+  /* overflow: hidden; */
+  /* overflow-x: hidden; */
   /* justify-content: center;
   align-items: center; */
 }
 
-#main-container {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
+/* body::-webkit-scrollbar {
+  background-color: blue;
+  color: #000;
+} */
 
-.ps-sidebar-root {
-  background-color: red;
+
+html, body, #example {
   height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
+.List::-webkit-scrollbar {
+  width: 8px;
+  background-color: transparent;
+}
+
+.List::-webkit-scrollbar-thumb {
+  box-shadow: inset 0 0 0 8px;
+}
+
+.Row {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.Item {
+  width: calc(100% - 8px);
+  margin: 4px;
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+/* root = main + footer */
 main {
   display: flex;
   flex-grow: 1;
+  height: calc(100% - 30px);
   background-color: rgb(90, 90, 168);
-}
-
-header {
-  background-color: rgb(205, 155, 209);
-
 }
 
 footer {
@@ -45,26 +78,122 @@ footer {
   background-color: rgb(205, 155, 209);
 }
 
-/* main {
-  font-family: sans-serif;
-  overflow-y: hidden;
-  display: flex;
+/* main = sidebar + content-container */
+/* .css-1wvkae5{
+  border-right-width: 0px;
 } */
 
-/* button {
-  background-color: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-  border: none;
-  appearance: none;
-  font-size: 1.3rem;
-  box-shadow: 0px 8px 28px -6px rgba(24, 39, 75, 0.12),
-    0px 18px 88px -4px rgba(24, 39, 75, 0.14);
-  transition: all ease-in 0.1s;
-  cursor: pointer;
-  opacity: 0.9;
+.ps-sidebar-root.css-1wvake5{
+  border-right-style: none;
+  width: 150px;
+  min-width: 150px;
+  height: 100%;
+  background-color: rgb(0, 0, 0);
+}
+.ps-sidebar-root.ps-collapsed.css-1wvake5{
+  width: 60px;
+  min-width: 60px;
 }
 
+#menu-item {
+  padding-left: 11px;
+}
+
+/*  content-container = header + main-container */
+#content-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-width: 360px;
+
+  /* overflow-y: auto; */
+
+  /* overflow-y: overlay;
+  -webkit-text-fill-color: black;
+  color: rgba(0, 0, 0, 0);
+  transition: color .3s ease; */
+}
+
+
+#content-container:hover {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+#content-container::-webkit-scrollbar {
+  width: 8px;
+  background-color: red;
+}
+
+#content-container::-webkit-scrollbar-thumb {
+  box-shadow: inset 0 0 0 8px;
+}
+
+
+header {
+  background-color: rgb(205, 155, 209);
+  height: 30px;
+  /* overflow: hidden; */
+}
+
+#main-container{
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-width: 360px;
+}
+
+
+/*  */
+#emoji-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  padding: 10px;
+  margin-right: 6px;
+  /* height: 100%; */
+  /* grid-template-columns: repeat(auto-fit, minmax(100px, calc(min(1fr, 150px)))); */
+  grid-gap: 10px;
+  overflow-y: auto;
+}
+
+#name-box {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: calc(100% - 8px);
+  height: 15%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 4px;
+  text-align: left;
+  font-size:11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+#favorite-container {
+  display: flex;
+  flex-wrap: nowrap;
+
+  /* overflow-x: scroll; */
+  height: 40px;
+  background-color: #dd5789;
+  padding: 10px;
+  grid-gap: 10px;
+  /* grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); */
+}
+
+#favorite-container #name-box{
+  font-size: 9px;
+  padding: 1px;
+  width: calc(100% - 2px);
+  height: 25%;
+}
+
+
+
+
+/*
 button:hover {
   transform: scale(1.05);
   opacity: 1;

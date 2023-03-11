@@ -10,9 +10,10 @@ root.render(
   </ProSidebarProvider>
 );
 
-// // calling IPC exposed from preload script
+// calling IPC exposed from preload script
 // window.electron.ipcRenderer.on('ipc-test', (arg) => {
 //   // eslint-disable-next-line no-console
 //   console.log(arg);
 // });
-// window.electron.ipcRenderer.sendMessage('ipc-example', ['ping']);
+window.electron.ipcRenderer.sendMessage('ipc-example', ['ping']);
+

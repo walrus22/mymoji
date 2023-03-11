@@ -15,6 +15,10 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import { PythonShell } from 'python-shell';
+import { emojiElementTest, emojiMainSmallTest} from '../testData';
+
+
+
 
 class AppUpdater {
   constructor() {
@@ -39,6 +43,10 @@ const scriptPath = getAssetPath(path.join('python_modules', 'tracker.py'));
 const pyPath = getAssetPath(path.join('python_modules', 'venv', 'Scripts', 'python.exe'));
 const pyshell = new PythonShell(scriptPath, { pythonPath: pyPath })
 
+let userFavoriteEmojis:FavoriteEmojis = emojiMainSmallTest
+let userFavoriteElements = emojiElementTest
+
+/////////////////// IPC ////////////////////////////////////
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
@@ -46,31 +54,27 @@ ipcMain.on('ipc-example', async (event, arg) => {
 });
 
 
-interface emoji {
-  [command: string]:string;
-}
-let userFavorite:emoji = {':zz' : 'testpath1', ':dgd' : 'ttpath2'}
-
-/////////////////// IPC ////////////////////////////////////
-
 // Home 화면에서 favorite 제공
 ipcMain.on('favorite-list', (event) => {
-  event.sender.send('favorite-list', userFavorite);
+  // event.sender.send('favorite-list', userFavoriteElements);
+  event.sender.send('favorite-list', [userFavoriteEmojis, userFavoriteElements]);
 });
 
 // home 이나 search에서 favorite 추가
-ipcMain.on('favorite-add', (event, obj:emoji) => {
-  userFavorite = {...userFavorite, ...obj}
-  console.log(userFavorite);
-  pyshell.send(JSON.stringify(userFavorite));
+ipcMain.on('favorite-add', (event, obj:EmojiElement) => {
+  userFavoriteElements.push(obj)
+  console.log(userFavoriteElements);
+  // pyshell.send(JSON.stringify(userFavoriteElements));
 });
 
 // favorite deletion
-ipcMain.on('favorite-delete', (event, obj) => {
-  delete userFavorite[obj]
-  console.log(userFavorite);
-  pyshell.send(JSON.stringify(userFavorite));
+ipcMain.on('favorite-delete', (event, obj : EmojiElement) => {
+  userFavoriteElements = userFavoriteElements.filter((item) => !(item.id === obj.id && item.emoji_id === obj.emoji_id))
+  console.log(userFavoriteElements);
+  pyshell.send(JSON.stringify(userFavoriteElements));
 });
+
+// window.electron.ipcRenderer.sendMessage('favorite-delete', ret);
 
 ////////////////////////////////////////////////////////////
 
@@ -114,8 +118,9 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1600,
+    width: 1400,
     height: 900,
+    minWidth: 525,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       preload: app.isPackaged
@@ -125,7 +130,7 @@ const createWindow = async () => {
     },
   });
 
-
+  mainWindow.setPosition(2560,1000)
   mainWindow.loadURL(resolveHtmlPath('index.html'))
 
   mainWindow.on('ready-to-show', () => {
