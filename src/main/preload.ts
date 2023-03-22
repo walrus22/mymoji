@@ -4,7 +4,15 @@ import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 // import dotenv from 'dotenv';
 // dotenv.config();
 
-export type Channels = 'ipc-example' | 'favorite-list' | 'favorite-add' | 'favorite-delete';
+export type Channels =
+'ipc-example'
+| 'favorite-list'
+| 'favorite-element-add'
+| 'favorite-element-remove'
+| 'favorite-emoji-add'
+| 'favorite-emoji-remove'
+| "favorite-check"
+
 
 const electronHandler = {
   ipcRenderer: {
@@ -12,10 +20,20 @@ const electronHandler = {
       const subscription = (_event: IpcRendererEvent, args: [FavoriteEmojis,FavoriteElements]) => func(args);
       ipcRenderer.on(channel, subscription);
       return () => {
-        // console.trace("removed completely");
+        console.log("removed completely");
         ipcRenderer.removeListener(channel, subscription);
       };
     },
+
+    checkFav(channel: Channels, func: (arg: boolean) => void) {
+      const subscription = (_event: IpcRendererEvent, arg: boolean) => func(arg);
+      ipcRenderer.on(channel, subscription);
+      return () => {
+        console.log("removed completely");
+        ipcRenderer.removeListener(channel, subscription);
+      };
+    },
+
     on(channel: Channels, func: (...args: unknown[]) => void) {
       const subscription = (_event: IpcRendererEvent, ...args: unknown[]) => func(...args);
       ipcRenderer.on(channel, subscription);
@@ -25,6 +43,7 @@ const electronHandler = {
         ipcRenderer.removeListener(channel, subscription);
       };
     },
+
     sendMessage(channel: Channels, args: any) {
       ipcRenderer.send(channel, args);
 
@@ -33,12 +52,13 @@ const electronHandler = {
         ipcRenderer.removeListener(channel, args);
       };
     },
+
     once(channel: Channels, func: (...args: unknown[]) => void) {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
+
     send(channel: Channels) {
       ipcRenderer.send(channel)
-
     }
 
     // invoke(channel: Channels) {

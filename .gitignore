@@ -30,6 +30,5 @@ npm-debug.log.*
 *.scss.d.ts
 
 .env
-src/testData.tsx
 src/renderer/component/for gpt.tsx
 src/renderer/component/Test.tsx

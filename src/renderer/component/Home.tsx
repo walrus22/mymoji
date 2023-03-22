@@ -24,7 +24,7 @@ export default function Home() {
     return window.electron.ipcRenderer.home('favorite-list', (res) => {
       setEmoji(res[0])
       setElement(res[1])
-      // console.log(res);
+      console.log(res);
     });
   }, [])
 

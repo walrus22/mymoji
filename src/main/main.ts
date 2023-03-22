@@ -13,7 +13,7 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
-import { resolveHtmlPath } from './util';
+import { resolveHtmlPath, UserConfig, isEqaulObj } from './util';
 import { PythonShell } from 'python-shell';
 import { emojiElementTest, emojiMainSmallTest} from '../testData';
 
@@ -38,13 +38,29 @@ const getAssetPath = (...paths: string[]): string => {
   return path.join(RESOURCES_PATH, ...paths);
 };
 
+
+// get userConfig
+const userConfig = new UserConfig({
+  configName: 'userConfig',
+  defaults : {
+    favEmojis : [],
+    favElements : []
+  }
+})
+
+
+
+
+
 // const scriptPath = getAssetPath(path.join('python_modules', 'mymoji_test.py'));
 const scriptPath = getAssetPath(path.join('python_modules', 'tracker.py'));
 const pyPath = getAssetPath(path.join('python_modules', 'venv', 'Scripts', 'python.exe'));
 const pyshell = new PythonShell(scriptPath, { pythonPath: pyPath })
 
-let userFavoriteEmojis:FavoriteEmojis = emojiMainSmallTest
+let userFavoriteEmojis = emojiMainSmallTest
 let userFavoriteElements = emojiElementTest
+// let userFavoriteEmojis = userConfig.getEmojis()
+// let userFavoriteElements = userConfig.getElements()
 
 /////////////////// IPC ////////////////////////////////////
 ipcMain.on('ipc-example', async (event, arg) => {
@@ -54,6 +70,18 @@ ipcMain.on('ipc-example', async (event, arg) => {
 });
 
 
+ipcMain.on('favorite-check', (event, obj:EmojiElement|EmojiMain) => {
+  // event.sender.send('favorite-list', userFavoriteElements);
+  let isFav = false;
+  for(let i of userFavoriteEmojis) {
+    if(isEqaulObj(i, obj)) {
+      isFav = true;
+    }
+  }
+  console.log(isFav);
+  event.sender.send('favorite-check', isFav);
+});
+
 // Home 화면에서 favorite 제공
 ipcMain.on('favorite-list', (event) => {
   // event.sender.send('favorite-list', userFavoriteElements);
@@ -61,20 +89,30 @@ ipcMain.on('favorite-list', (event) => {
 });
 
 // home 이나 search에서 favorite 추가
-ipcMain.on('favorite-add', (event, obj:EmojiElement) => {
-  userFavoriteElements.push(obj)
-  console.log(userFavoriteElements);
+ipcMain.on('favorite-element-add', (event, obj:EmojiElement | EmojiMain) => {
+  // if()
+    
+  // userFavoriteElements.push(obj)
+  // console.log(userFavoriteElements);
   // pyshell.send(JSON.stringify(userFavoriteElements));
 });
-
-// favorite deletion
-ipcMain.on('favorite-delete', (event, obj : EmojiElement) => {
+ipcMain.on('favorite-element-remove', (event, obj : EmojiElement) => {
   userFavoriteElements = userFavoriteElements.filter((item) => !(item.id === obj.id && item.emoji_id === obj.emoji_id))
   console.log(userFavoriteElements);
   pyshell.send(JSON.stringify(userFavoriteElements));
 });
 
-// window.electron.ipcRenderer.sendMessage('favorite-delete', ret);
+// ipcMain.on('favorite-emoji-add', (event, obj:EmojiMain) => {
+//   userFavoriteEmojis.push(obj);
+//   console.log(userFavoriteEmojis);
+//   // pyshell.send(JSON.stringify(userFavoriteElements));
+// });
+ipcMain.on('favorite-emoji-remove', (event, obj : EmojiElement) => {
+  userFavoriteElements = userFavoriteElements.filter((item) => !(item.id === obj.id && item.emoji_id === obj.emoji_id))
+  console.log(userFavoriteElements);
+  pyshell.send(JSON.stringify(userFavoriteElements));
+});
+
 
 ////////////////////////////////////////////////////////////
 
@@ -146,6 +184,9 @@ const createWindow = async () => {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+    console.log("i'm finished");
+    userConfig.set("favEmojis",  userFavoriteEmojis)
+    userConfig.set("favElements",  userFavoriteElements)
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);

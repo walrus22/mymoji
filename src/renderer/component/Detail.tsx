@@ -10,14 +10,14 @@ export default function Detail() {
   const {platform, id} = useParams();
   // const navigate = useNavigate();
   const location = useLocation();
-  const emoji : EmojiMain = location.state.emoji;
+  const emoji : EmojiMain = location.state.emoji; // 이전 페이지에서 클릭한 이모지 정보 가져옴
   console.log(emoji);
 
   useEffect(() => {
     postServer('/api/detail', {platform: platform, emoji_id: id})
     .then((res) => {
       setData(res)
-      console.log(res);
+      // console.log(res);
     })
   }, [])
 
