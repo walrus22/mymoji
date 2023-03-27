@@ -11,12 +11,13 @@ export type Channels =
 | 'favorite-element-remove'
 | 'favorite-emoji-add'
 | 'favorite-emoji-remove'
-| "favorite-check"
+| 'favorite-check'
+| 'copy-clipboard'
 
 
 const electronHandler = {
   ipcRenderer: {
-    home(channel: Channels, func: (args: [FavoriteEmojis,FavoriteElements]) => void) {
+    home(channel: Channels, func: (args:[FavoriteEmojis,FavoriteElements]) => void) {
       const subscription = (_event: IpcRendererEvent, args: [FavoriteEmojis,FavoriteElements]) => func(args);
       ipcRenderer.on(channel, subscription);
       return () => {
@@ -27,6 +28,7 @@ const electronHandler = {
 
     checkFav(channel: Channels, func: (arg: boolean) => void) {
       const subscription = (_event: IpcRendererEvent, arg: boolean) => func(arg);
+      console.log("on");
       ipcRenderer.on(channel, subscription);
       return () => {
         console.log("removed completely");
@@ -40,7 +42,8 @@ const electronHandler = {
 
       return () => {
         console.log("removed completely");
-        ipcRenderer.removeListener(channel, subscription);
+        // ipcRenderer.removeListener(channel, subscription);
+        ipcRenderer.removeAllListeners(channel)
       };
     },
 

@@ -9,6 +9,7 @@ declare global {
     platform: string,
     popularity: number,
     type_main: string,
+    isFav?: boolean,
   }
 
   interface EmojiElement {
@@ -17,7 +18,8 @@ declare global {
     emoji_id: number,
     path: string,
     type: string,
-    command? : string
+    command? : string,
+    isFav?: boolean,
   }
 
   interface EmojiID {

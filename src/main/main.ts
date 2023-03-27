@@ -9,15 +9,15 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, clipboard, Tray, nativeImage } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
-import { resolveHtmlPath, UserConfig, isEqaulObj } from './util';
+import { resolveHtmlPath, UserConfig } from './util';
 import { PythonShell } from 'python-shell';
 import { emojiElementTest, emojiMainSmallTest} from '../testData';
-
-
+import { isEqualEmoji } from '../common';
+import axios from 'axios';
 
 
 class AppUpdater {
@@ -49,9 +49,6 @@ const userConfig = new UserConfig({
 })
 
 
-
-
-
 // const scriptPath = getAssetPath(path.join('python_modules', 'mymoji_test.py'));
 const scriptPath = getAssetPath(path.join('python_modules', 'tracker.py'));
 const pyPath = getAssetPath(path.join('python_modules', 'venv', 'Scripts', 'python.exe'));
@@ -70,47 +67,75 @@ ipcMain.on('ipc-example', async (event, arg) => {
 });
 
 
-ipcMain.on('favorite-check', (event, obj:EmojiElement|EmojiMain) => {
-  // event.sender.send('favorite-list', userFavoriteElements);
-  let isFav = false;
+const API_URL = "http://127.0.0.1:20000/"
+
+async function writeImageUrlToClipboard(url) {
+  try {
+    // console.log(url);
+    axios.get(url)
+    .then((res) => {
+      const image = nativeImage.createFromDataURL(res.data.data_url);
+      clipboard.writeImage(image);
+    })
+  } catch (error) {
+    console.error('Failed to write image to clipboard:', error);
+  }
+}
+
+ipcMain.on('copy-clipboard', (event, element:EmojiElement) => {
+  console.log(element);
+  writeImageUrlToClipboard(`${API_URL}/data/${element.platform}/${element.emoji_id}/${element.id}/${element.type}`)
+});
+
+ipcMain.on('favorite-check', (event, obj:EmojiMain) => {
   for(let i of userFavoriteEmojis) {
-    if(isEqaulObj(i, obj)) {
-      isFav = true;
+    if(isEqualEmoji(i, obj)) {
+      event.sender.send('favorite-check', true);
+      console.log('true');
+      return;
     }
   }
-  console.log(isFav);
-  event.sender.send('favorite-check', isFav);
+  console.log('false');
+  event.sender.send('favorite-check', false);
 });
 
 // Home 화면에서 favorite 제공
 ipcMain.on('favorite-list', (event) => {
   // event.sender.send('favorite-list', userFavoriteElements);
+  console.log("fav-list");
   event.sender.send('favorite-list', [userFavoriteEmojis, userFavoriteElements]);
 });
 
 // home 이나 search에서 favorite 추가
-ipcMain.on('favorite-element-add', (event, obj:EmojiElement | EmojiMain) => {
-  // if()
-    
-  // userFavoriteElements.push(obj)
+ipcMain.on('favorite-element-add', (event, obj:EmojiElement) => {
+  userFavoriteElements.push(obj)
   // console.log(userFavoriteElements);
-  // pyshell.send(JSON.stringify(userFavoriteElements));
+  pyshell.send(JSON.stringify(userFavoriteElements));
 });
 ipcMain.on('favorite-element-remove', (event, obj : EmojiElement) => {
-  userFavoriteElements = userFavoriteElements.filter((item) => !(item.id === obj.id && item.emoji_id === obj.emoji_id))
+
+  // for (let i = 0; i < userFavoriteElements.length; i++) {
+  //   if(isEqualEmoji(obj, userFavoriteElements[i])) {
+  //     userFavoriteElements.splice(i,1)
+  //   }
+  // }
+  userFavoriteElements = userFavoriteElements.filter((item) => !(item.id === obj.id && item.emoji_id === obj.emoji_id && item.platform === obj.platform))
   console.log(userFavoriteElements);
   pyshell.send(JSON.stringify(userFavoriteElements));
 });
 
-// ipcMain.on('favorite-emoji-add', (event, obj:EmojiMain) => {
-//   userFavoriteEmojis.push(obj);
-//   console.log(userFavoriteEmojis);
-//   // pyshell.send(JSON.stringify(userFavoriteElements));
-// });
-ipcMain.on('favorite-emoji-remove', (event, obj : EmojiElement) => {
-  userFavoriteElements = userFavoriteElements.filter((item) => !(item.id === obj.id && item.emoji_id === obj.emoji_id))
-  console.log(userFavoriteElements);
-  pyshell.send(JSON.stringify(userFavoriteElements));
+ipcMain.on('favorite-emoji-add', (event, obj:EmojiMain) => {
+  // console.log(obj);
+  userFavoriteEmojis.push(obj);
+  console.log(userFavoriteEmojis.length);
+});
+ipcMain.on('favorite-emoji-remove', (event, obj : EmojiMain) => {
+  for (let i = 0; i < userFavoriteEmojis.length; i++) {
+    if(isEqualEmoji(obj, userFavoriteEmojis[i])) {
+      userFavoriteEmojis.splice(i,1)
+    }
+  }
+  console.log(userFavoriteEmojis.length);
 });
 
 

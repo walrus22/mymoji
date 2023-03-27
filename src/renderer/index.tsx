@@ -16,4 +16,5 @@ root.render(
 //   console.log(arg);
 // });
 window.electron.ipcRenderer.sendMessage('ipc-example', ['ping']);
+window.electron.ipcRenderer.send('favorite-list')
 
